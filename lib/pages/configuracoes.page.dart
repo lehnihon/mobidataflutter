@@ -14,19 +14,29 @@ class _ConfiguracoesState extends State<ConfiguracoesPage> {
 
   final _idController = TextEditingController();
   bool editado = false;
+  bool bdinitial = false;
+  final snackBar = SnackBar(content: Text('ID Salvo'));
 
   @override
   void initState() {
     super.initState();
-
     db.getConfig().then((config) {
-      _idController.text = config.id;
+      if (config == null) {
+        bdinitial = true;
+      } else {
+        _idController.text = config.id;
+      }
     });
   }
 
   void saveConfig(id) {
     Configuracoes config = new Configuracoes(id);
-    db.updateConfig(config);
+    if (bdinitial) {
+      db.insertConfig(config);
+    } else {
+      db.updateConfig(config);
+    }
+    Scaffold.of(context).showSnackBar(snackBar);
   }
 
   @override

@@ -42,7 +42,6 @@ class DatabaseHelper {
 
   Future<int> insertConfig(Configuracoes config) async {
     Database db = await this.database;
-
     var resultado = await db.insert(configTable, config.toMap());
 
     return resultado;
