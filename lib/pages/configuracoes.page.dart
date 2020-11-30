@@ -21,11 +21,13 @@ class _ConfiguracoesState extends State<ConfiguracoesPage> {
   void initState() {
     super.initState();
     db.getConfig().then((config) {
-      if (config == null) {
-        bdinitial = true;
-      } else {
-        _idController.text = config.id;
-      }
+      setState(() {
+        if (config == null) {
+          bdinitial = true;
+        } else {
+          _idController.text = config.id;
+        }
+      });
     });
   }
 

@@ -1,20 +1,20 @@
 class Status {
-  final int id;
+  final String id;
   final String nome;
   final String tiraFoto;
 
   Status({this.id, this.nome, this.tiraFoto});
 
-  factory Status.fromMap(Map<String, dynamic> map) {
+  factory Status.fromMap(Map map) {
     return Status(
-      id: map['id'],
+      id: map['id'].toString(),
       nome: map['nome'],
       tiraFoto: map['tira_foto'],
     );
   }
 
-  Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
+  Map toMap() {
+    var map = {
       'id': id,
       'nome': nome,
       'tira_foto': tiraFoto,

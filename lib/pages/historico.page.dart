@@ -34,16 +34,22 @@ class _HistoricoState extends State {
   }
 
   _getHistorico() async {
-    final response =
-        await http.get('http://34.200.50.59/mobidataapi/baixa.php?id=$_id');
-    if (response.body == 'false') {
+    try {
+      final response = await http
+          .get('http://34.200.50.59/mobidataapi/baixa_novo.php?id=$_id');
+      if (response.body == 'false') {
+        setState(() {
+          this._loading = false;
+        });
+      } else {
+        setState(() {
+          Iterable list = json.decode(response.body);
+          historico = list.map((model) => Historico.fromJson(model)).toList();
+          this._loading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
-        this._loading = false;
-      });
-    } else {
-      setState(() {
-        Iterable list = json.decode(response.body);
-        historico = list.map((model) => Historico.fromJson(model)).toList();
         this._loading = false;
       });
     }

@@ -1,11 +1,11 @@
 class Baixa {
-  String nota, status, foto, data, hora, latitude, longitude, userid;
+  String id, nota, status, foto, data, hora, latitude, longitude, userid;
 
   Baixa(this.nota, this.status, this.foto, this.data, this.hora, this.latitude,
       this.longitude, this.userid);
 
-  Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
+  Map toMap() {
+    var map = {
       'nota': nota,
       'status': status,
       'foto': foto,
@@ -18,7 +18,8 @@ class Baixa {
     return map;
   }
 
-  Baixa.fromMap(Map<String, dynamic> map) {
+  Baixa.fromMap(Map map) {
+    id = map['id'].toString();
     nota = map['nota'];
     status = map['status'];
     foto = map['foto'];
@@ -31,6 +32,6 @@ class Baixa {
 
   @override
   String toString() {
-    return "Baixa => (id: $nota, status: $status, foto: $foto, data: $data, hora: $hora, latitude: $latitude, longitude: $longitude, userid: $userid)";
+    return "Baixa => (id: $id,nota: $nota, status: $status, foto: $foto, data: $data, hora: $hora, latitude: $latitude, longitude: $longitude, userid: $userid)";
   }
 }

@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="mobidata_dtc"
+        android:label="DataCerta"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

@@ -84,7 +84,7 @@ class DatabaseHelperBaixa {
   Future<List<Baixa>> getBaixaLista() async {
     Database db = await this.database;
 
-    var resultado = await db.query(baixaTable);
+    var resultado = await db.query(baixaTable, orderBy: "id DESC");
 
     List<Baixa> lista = resultado.isNotEmpty
         ? resultado.map((c) => Baixa.fromMap(c)).toList()
@@ -100,6 +100,15 @@ class DatabaseHelperBaixa {
       baixaTable,
       baixa.toMap(),
     );
+
+    return resultado;
+  }
+
+  Future<int> deleteBaixa(id) async {
+    var db = await this.database;
+
+    var resultado =
+        await db.delete(baixaTable, where: '$idCol = ?', whereArgs: [id]);
 
     return resultado;
   }
