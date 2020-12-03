@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:mobidata_dtc/classes/baixa.class.dart';
 import 'package:mobidata_dtc/classes/configuracoes.class.dart';
 import 'package:mobidata_dtc/classes/lista.class.dart';
+import 'package:mobidata_dtc/classes/entrega.class.dart';
 import 'dart:convert';
 
 import 'package:mobidata_dtc/helpers/database_helper.dart';
@@ -22,7 +23,8 @@ class _ListaState extends State {
   Baixa _baixa;
   Position _position;
   var _loading = true;
-  List<Lista> _lista;
+  List<Lista> _listas;
+  List<Entrega> _entregas;
   var _buttonsEnabled = true;
   DatabaseHelperBaixa dbb = DatabaseHelperBaixa();
   final snackBar = SnackBar(content: Text('Lista aceita!'));
@@ -36,6 +38,7 @@ class _ListaState extends State {
   Future initData() async {
     getPosition();
     _config = await db.getConfig();
+    _getEntregas();
     _getLista();
   }
 
@@ -48,8 +51,8 @@ class _ListaState extends State {
 
   _getLista() async {
     try {
-      final response = await http.get(
-          'http://34.200.50.59/mobidataapi/base_novo.php?id=' + _config.id);
+      final response = await http
+          .get('http://34.200.50.59/mobidataapi/base_novo_listas.php');
       if (response.body == 'false') {
         setState(() {
           this._loading = false;
@@ -58,7 +61,30 @@ class _ListaState extends State {
         Iterable list = json.decode(response.body);
         setState(() {
           this._loading = false;
-          _lista = list.map((model) => Lista.fromJson(model)).toList();
+          _listas = list.map((model) => Lista.fromJson(model)).toList();
+        });
+      }
+    } catch (e) {
+      setState(() {
+        this._loading = false;
+      });
+    }
+  }
+
+  _getEntregas() async {
+    try {
+      final response = await http.get(
+          'http://34.200.50.59/mobidataapi/base_novo_entregas.php?id=' +
+              _config.id);
+      if (response.body == 'false') {
+        setState(() {
+          this._loading = false;
+        });
+      } else {
+        Iterable list = json.decode(response.body);
+        setState(() {
+          this._loading = false;
+          _entregas = list.map((model) => Entrega.fromJson(model)).toList();
         });
       }
     } catch (e) {
@@ -115,10 +141,44 @@ class _ListaState extends State {
     );
 
     setState(() {
-      _lista.removeAt(index);
+      _entregas.removeAt(index);
     });
 
     sendData(_baixa);
+  }
+
+  Future<void> _showMyDialog(numlista) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Aceita a lista: $numlista?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Esta lista será enviada para aprovação.'),
+                Text('Assim que ela for aprovada, as entregas serão listadas.')
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Aceitar'),
+              onPressed: () {
+                aceitarLista(numlista);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void aceitarLista(numlista) async {
@@ -128,7 +188,7 @@ class _ListaState extends State {
 
     try {
       final response = await http.post(
-        'http://34.200.50.59/mobidataapi/base_novo.php',
+        'http://34.200.50.59/mobidataapi/base_novo_listas.php',
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -138,6 +198,7 @@ class _ListaState extends State {
         }),
       );
       Scaffold.of(context).showSnackBar(snackBar);
+      Navigator.of(context).pop();
     } catch (e) {}
     setState(() {
       _buttonsEnabled = true;
@@ -150,30 +211,8 @@ class _ListaState extends State {
     return (_loading)
         ? Loading()
         : Container(
-            child: (_lista != null &&
-                    _lista.length == 1 &&
-                    _lista[0].idexterno == null)
+            child: (_entregas != null && _entregas.length > 0)
                 ? Column(children: <Widget>[
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text(
-                      "Lista " + _lista[0].numlista + " disponível",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    RaisedButton(
-                      color: Theme.of(context).primaryColor,
-                      onPressed: _buttonsEnabled
-                          ? () => aceitarLista(_lista[0].numlista)
-                          : null,
-                      child: const Text('Aceitar Lista',
-                          style: TextStyle(fontSize: 20, color: Colors.white)),
-                    ),
-                  ])
-                : Column(children: <Widget>[
                     Container(
                       padding: EdgeInsets.all(10),
                       width: double.infinity,
@@ -181,9 +220,9 @@ class _ListaState extends State {
                           border: Border.all(color: Colors.black12)),
                       child: Row(children: <Widget>[
                         Text(
-                          (_lista == null)
+                          (_entregas == null)
                               ? "Nenhuma nota disponível"
-                              : "Quantidade: ${_lista.length}",
+                              : "Quantidade: ${_entregas.length}",
                           style: TextStyle(
                               fontSize: 18,
                               color: Theme.of(context).primaryColor),
@@ -193,11 +232,11 @@ class _ListaState extends State {
                     Expanded(
                       child: ListView.builder(
                           padding: const EdgeInsets.all(8),
-                          itemCount: (_lista == null) ? 0 : _lista.length,
+                          itemCount: (_entregas == null) ? 0 : _entregas.length,
                           itemBuilder: (BuildContext context, int index) {
                             return ListTile(
                               title: Text(
-                                '${_lista[index].idexterno}',
+                                '${_entregas[index].idexterno}',
                               ),
                               trailing: Icon(
                                 Icons.send,
@@ -205,12 +244,35 @@ class _ListaState extends State {
                               ),
                               enabled: _buttonsEnabled,
                               onTap: () {
-                                enviaNota(_lista[index].idexterno, index);
+                                enviaNota(_entregas[index].idexterno, index);
                               },
                             );
                           }),
-                    )
-                  ]),
+                    ),
+                  ])
+                : Container(
+                    child: ListView.builder(
+                        padding: const EdgeInsets.all(8),
+                        itemCount: (_listas == null) ? 0 : _listas.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Card(
+                            child: ListTile(
+                              title: Text(
+                                'Lista: ${_listas[index].numlista} ',
+                              ),
+                              subtitle: Text('Setor: ${_listas[index].setor}'),
+                              trailing: Icon(
+                                Icons.add,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              enabled: _buttonsEnabled,
+                              onTap: () {
+                                _showMyDialog(_listas[index].numlista);
+                              },
+                            ),
+                          );
+                        }),
+                  ),
           );
   }
 }

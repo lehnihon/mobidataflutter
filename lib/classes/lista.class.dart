@@ -1,13 +1,13 @@
 class Lista {
+  final String setor;
   final String numlista;
-  final String idexterno;
 
-  Lista({this.numlista, this.idexterno});
+  Lista({this.setor, this.numlista});
 
   factory Lista.fromJson(Map<String, dynamic> json) {
     return Lista(
+      setor: json['setor'],
       numlista: json['numlista'],
-      idexterno: json['idexterno'],
     );
   }
 }
