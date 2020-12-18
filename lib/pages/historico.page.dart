@@ -1,3 +1,4 @@
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,14 +16,16 @@ class _HistoricoState extends State {
   List<Historico> historico;
   DatabaseHelper db = DatabaseHelper();
   String _id;
-  var _loading = true;
+  var _loading = false;
+  String dropdownValue = "Entregas";
+  final _notaController = TextEditingController();
+  bool _buttonsEnabled = true;
 
   @override
   void initState() {
     super.initState();
     db.getConfig().then((config) {
       _id = config.id;
-      _getHistorico();
     });
   }
 
@@ -33,25 +36,60 @@ class _HistoricoState extends State {
     }
   }
 
-  _getHistorico() async {
-    try {
-      final response = await http
-          .get('http://34.200.50.59/mobidataapi/baixa_novo.php?id=$_id');
-      if (response.body == 'false') {
+  Future<void> barCodeScan() async {
+    var result = await BarcodeScanner.scan();
+    this._notaController.text = result.rawContent;
+  }
+
+  void buscarItens(nota) {
+    setState(() {
+      this._loading = true;
+    });
+    _getHistorico(nota);
+  }
+
+  _getHistorico(nota) async {
+    print(this.dropdownValue);
+    if (this.dropdownValue == 'Entregas') {
+      try {
+        final response = await http.get(
+            'http://34.200.50.59/mobidataapi/baixa_novo.php?id=$_id&nota=$nota');
+        if (response.body == 'false') {
+          setState(() {
+            this._loading = false;
+          });
+        } else {
+          setState(() {
+            Iterable list = json.decode(response.body);
+            historico = list.map((model) => Historico.fromJson(model)).toList();
+            this._loading = false;
+          });
+        }
+      } catch (e) {
         setState(() {
-          this._loading = false;
-        });
-      } else {
-        setState(() {
-          Iterable list = json.decode(response.body);
-          historico = list.map((model) => Historico.fromJson(model)).toList();
           this._loading = false;
         });
       }
-    } catch (e) {
-      setState(() {
-        this._loading = false;
-      });
+    } else {
+      try {
+        final response = await http.get(
+            'http://34.200.50.59/mobidataapi/baixa_novo.php?id=$_id&nota=$nota&lista=1');
+        if (response.body == 'false') {
+          setState(() {
+            this._loading = false;
+          });
+        } else {
+          setState(() {
+            Iterable list = json.decode(response.body);
+            historico = list.map((model) => Historico.fromJson(model)).toList();
+            this._loading = false;
+          });
+        }
+      } catch (e) {
+        setState(() {
+          this._loading = false;
+        });
+      }
     }
   }
 
@@ -60,20 +98,83 @@ class _HistoricoState extends State {
     return (_loading)
         ? Loading()
         : Container(
-            child: ListView.builder(
-                padding: const EdgeInsets.all(8),
-                itemCount: (historico == null) ? 0 : historico.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Card(
-                    child: ListTile(
-                      leading: Icon(Icons.home),
-                      title: Text('${historico[index].nota}'),
-                      subtitle: Text(
-                          '${historico[index].enderecoentrega}\n${historico[index].motivo}'),
-                      isThreeLine: true,
+            child: Column(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(8),
+                  child: Column(children: <Widget>[
+                    DropdownButton<String>(
+                      value: dropdownValue,
+                      hint: new Text("Selecione"),
+                      isExpanded: true,
+                      elevation: 16,
+                      style:
+                          new TextStyle(color: Colors.grey[600], fontSize: 16),
+                      underline: Container(
+                        height: 1,
+                        color: Colors.grey[500],
+                      ),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          dropdownValue = newValue;
+                        });
+                      },
+                      items: <String>['Entregas', 'Listas']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
                     ),
-                  );
-                }),
+                    TextFormField(
+                        controller: _notaController,
+                        decoration: InputDecoration(
+                          labelText: "Código da Nota",
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.developer_mode),
+                            onPressed: () {
+                              barCodeScan();
+                            },
+                          ),
+                        ),
+                        keyboardType: TextInputType.number),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    RaisedButton(
+                      color: Theme.of(context).primaryColor,
+                      onPressed: _buttonsEnabled
+                          ? () => buscarItens(_notaController.text)
+                          : null,
+                      child: const Text('Buscar',
+                          style: TextStyle(fontSize: 20, color: Colors.white)),
+                    ),
+                  ]),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                      padding: const EdgeInsets.all(8),
+                      itemCount: (historico == null) ? 0 : historico.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Card(
+                          child: ListTile(
+                            leading: Icon(Icons.home),
+                            title: Text('${historico[index].nota}'),
+                            subtitle: (historico[index].motivo == 'null' ||
+                                    historico[index].motivo == '' ||
+                                    historico[index].motivo == null)
+                                ? Text(
+                                    '${historico[index].enderecoentrega}\nLista disponivel')
+                                : Text(
+                                    '${historico[index].enderecoentrega}\n${historico[index].motivo}'),
+                            isThreeLine: true,
+                          ),
+                        );
+                      }),
+                ),
+              ],
+            ),
           );
   }
 }

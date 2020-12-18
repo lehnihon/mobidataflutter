@@ -261,11 +261,16 @@ class _BaixaPageState extends State<BaixaPage> {
           SizedBox(
             height: 10,
           ),
+          const Divider(
+            color: Colors.black26,
+            height: 10,
+            thickness: 1,
+            indent: 0,
+            endIndent: 0,
+          ),
           Container(
             padding: EdgeInsets.all(8),
             width: double.infinity,
-            decoration:
-                BoxDecoration(border: Border.all(color: Colors.black12)),
             child: Row(children: <Widget>[
               Text(
                 "Entregas em espera",
@@ -277,6 +282,13 @@ class _BaixaPageState extends State<BaixaPage> {
                 style: TextStyle(fontSize: 14),
               ),
             ]),
+          ),
+          const Divider(
+            color: Colors.black26,
+            height: 10,
+            thickness: 1,
+            indent: 0,
+            endIndent: 0,
           ),
           Expanded(
             child: Container(

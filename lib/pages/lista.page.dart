@@ -54,21 +54,13 @@ class _ListaState extends State {
       final response = await http
           .get('http://34.200.50.59/mobidataapi/base_novo_listas.php');
       if (response.body == 'false') {
-        setState(() {
-          this._loading = false;
-        });
       } else {
         Iterable list = json.decode(response.body);
         setState(() {
-          this._loading = false;
           _listas = list.map((model) => Lista.fromJson(model)).toList();
         });
       }
-    } catch (e) {
-      setState(() {
-        this._loading = false;
-      });
-    }
+    } catch (e) {}
   }
 
   _getEntregas() async {
