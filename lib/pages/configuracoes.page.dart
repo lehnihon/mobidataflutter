@@ -77,6 +77,29 @@ class _ConfiguracoesState extends State<ConfiguracoesPage> {
                   },
                   child: const Text('Gravar', style: TextStyle(fontSize: 20)),
                 ),
+                SizedBox(
+                  height: 10,
+                ),
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.redAccent)),
+                    child:
+                        Row(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          "- Confirme se o ID está correto.\n\n- Em caso de dúvida sobre uma baixa, pesquisar na aba 'histórico' por lista ou código de barras.\n\n- Ao realizar baixa de entrega na aba 'listas' aguardar o envio das entregas.\n- Não enviar as entregas novamente, aguardar o envio.",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                      )
+                    ]),
+                  ),
+                ),
               ],
             ),
           );

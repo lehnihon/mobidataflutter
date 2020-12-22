@@ -80,6 +80,8 @@ class _BaixaPageState extends State<BaixaPage> {
   final _notaController = TextEditingController();
   final snackBar = SnackBar(content: Text('Nota salva!'));
   final snackBarB = SnackBar(content: Text('Nota enviada!'));
+  final snackBarC =
+      SnackBar(content: Text('Cadastre seu ID em configurações!'));
   final String imagePath = "";
 
   @override
@@ -118,6 +120,9 @@ class _BaixaPageState extends State<BaixaPage> {
   Future initData() async {
     getPosition();
     _config = await db.getConfig();
+    if (_config.id == null || _config.id == '') {
+      Scaffold.of(context).showSnackBar(snackBarC);
+    }
   }
 
   Future takePicture() async {
@@ -162,33 +167,36 @@ class _BaixaPageState extends State<BaixaPage> {
       return;
     }
 
-    if (status.tiraFoto == 'S') {
-      foto = await takePicture();
+    if (_config.id != null && _config.id != '') {
+      if (status.tiraFoto == 'S') {
+        foto = await takePicture();
+      }
+
+      _baixa = new Baixa(
+        nota,
+        status.id,
+        foto,
+        data,
+        hora,
+        _position.latitude.toString(),
+        _position.longitude.toString(),
+        _config.id,
+      );
+
+      _notaController.text = '';
+      _status = null;
+
+      setState(() {
+        dbb.insertBaixa(_baixa);
+        getListBaixa();
+      });
+
+      initWork();
+
+      Scaffold.of(context).showSnackBar(snackBar);
+    } else {
+      Scaffold.of(context).showSnackBar(snackBarC);
     }
-
-    _baixa = new Baixa(
-      nota,
-      status.id,
-      foto,
-      data,
-      hora,
-      _position.latitude.toString(),
-      _position.longitude.toString(),
-      _config.id,
-    );
-
-    _notaController.text = '';
-    _status = null;
-
-    setState(() {
-      dbb.insertBaixa(_baixa);
-      getListBaixa();
-    });
-
-    initWork();
-
-    Scaffold.of(context).showSnackBar(snackBar);
-
     setState(() {
       _buttonsEnabled = true;
     });

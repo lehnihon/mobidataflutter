@@ -130,7 +130,7 @@ class _HistoricoState extends State {
                     TextFormField(
                         controller: _notaController,
                         decoration: InputDecoration(
-                          labelText: "Código da Nota",
+                          labelText: "Código",
                           suffixIcon: IconButton(
                             icon: Icon(Icons.developer_mode),
                             onPressed: () {

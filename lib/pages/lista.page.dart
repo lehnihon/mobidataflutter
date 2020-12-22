@@ -23,11 +23,13 @@ class _ListaState extends State {
   Baixa _baixa;
   Position _position;
   var _loading = true;
+  var _loadingB = true;
   List<Lista> _listas;
   List<Entrega> _entregas;
-  var _buttonsEnabled = true;
   DatabaseHelperBaixa dbb = DatabaseHelperBaixa();
   final snackBar = SnackBar(content: Text('Lista aceita!'));
+  final snackBarB =
+      SnackBar(content: Text('Cadastre seu ID em configurações!'));
 
   @override
   void initState() {
@@ -38,8 +40,12 @@ class _ListaState extends State {
   Future initData() async {
     getPosition();
     _config = await db.getConfig();
-    _getEntregas();
-    _getLista();
+    if (_config.id == null || _config.id == '') {
+      Scaffold.of(context).showSnackBar(snackBarB);
+    } else {
+      _getEntregas();
+      _getLista();
+    }
   }
 
   @override
@@ -54,13 +60,21 @@ class _ListaState extends State {
       final response = await http
           .get('http://34.200.50.59/mobidataapi/base_novo_listas.php');
       if (response.body == 'false') {
+        setState(() {
+          this._loadingB = false;
+        });
       } else {
         Iterable list = json.decode(response.body);
         setState(() {
+          this._loadingB = false;
           _listas = list.map((model) => Lista.fromJson(model)).toList();
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      setState(() {
+        this._loadingB = false;
+      });
+    }
   }
 
   _getEntregas() async {
@@ -149,8 +163,9 @@ class _ListaState extends State {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Esta lista será enviada para aprovação.'),
-                Text('Assim que ela for aprovada, as entregas serão listadas.')
+                Text('Ao aceitar esta lista será enviada para aprovação.'),
+                Text(
+                    'Aguarde a aprovação, verifique se seu ID está cadastrado corretamente.')
               ],
             ),
           ),
@@ -174,10 +189,6 @@ class _ListaState extends State {
   }
 
   void aceitarLista(numlista) async {
-    setState(() {
-      _buttonsEnabled = false;
-    });
-
     try {
       final response = await http.post(
         'http://34.200.50.59/mobidataapi/base_novo_listas.php',
@@ -192,15 +203,12 @@ class _ListaState extends State {
       Scaffold.of(context).showSnackBar(snackBar);
       Navigator.of(context).pop();
     } catch (e) {}
-    setState(() {
-      _buttonsEnabled = true;
-    });
     _getLista();
   }
 
   @override
   Widget build(BuildContext context) {
-    return (_loading)
+    return (_loading && _loadingB)
         ? Loading()
         : Container(
             child: (_entregas != null && _entregas.length > 0)
@@ -234,7 +242,6 @@ class _ListaState extends State {
                                 Icons.send,
                                 color: Theme.of(context).primaryColor,
                               ),
-                              enabled: _buttonsEnabled,
                               onTap: () {
                                 enviaNota(_entregas[index].idexterno, index);
                               },
@@ -243,27 +250,44 @@ class _ListaState extends State {
                     ),
                   ])
                 : Container(
-                    child: ListView.builder(
-                        padding: const EdgeInsets.all(8),
-                        itemCount: (_listas == null) ? 0 : _listas.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                'Lista: ${_listas[index].numlista} ',
-                              ),
-                              subtitle: Text('Setor: ${_listas[index].setor}'),
-                              trailing: Icon(
-                                Icons.add,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              enabled: _buttonsEnabled,
-                              onTap: () {
-                                _showMyDialog(_listas[index].numlista);
-                              },
+                    child: (_listas != null && _listas.length > 0)
+                        ? ListView.builder(
+                            padding: const EdgeInsets.all(8),
+                            itemCount: (_listas == null) ? 0 : _listas.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Card(
+                                child: ListTile(
+                                  title: Text(
+                                    'Lista: ${_listas[index].numlista} ',
+                                  ),
+                                  subtitle:
+                                      Text('Setor: ${_listas[index].setor}'),
+                                  trailing: Icon(
+                                    Icons.add,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  onTap: () {
+                                    _showMyDialog(_listas[index].numlista);
+                                  },
+                                ),
+                              );
+                            })
+                        : Column(children: <Widget>[
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black12)),
+                              child: Row(children: <Widget>[
+                                Text(
+                                  "Nenhuma lista disponível",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      color: Theme.of(context).primaryColor),
+                                )
+                              ]),
                             ),
-                          );
-                        }),
+                          ]),
                   ),
           );
   }
