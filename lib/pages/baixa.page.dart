@@ -82,6 +82,9 @@ class _BaixaPageState extends State<BaixaPage> {
   final snackBarB = SnackBar(content: Text('Nota enviada!'));
   final snackBarC =
       SnackBar(content: Text('Cadastre seu ID em configurações!'));
+  final snackBarD = SnackBar(
+      content: Text(
+          'Ligue seu GPS e reinicie o App, ele pode não estar funcionando'));
   final String imagePath = "";
 
   @override
@@ -120,7 +123,7 @@ class _BaixaPageState extends State<BaixaPage> {
   Future initData() async {
     getPosition();
     _config = await db.getConfig();
-    if (_config.id == null || _config.id == '') {
+    if (_config == null || _config.id == null || _config.id == '') {
       Scaffold.of(context).showSnackBar(snackBarC);
     }
   }
@@ -178,8 +181,8 @@ class _BaixaPageState extends State<BaixaPage> {
         foto,
         data,
         hora,
-        _position.latitude.toString(),
-        _position.longitude.toString(),
+        (_position == null) ? '' : _position.latitude.toString(),
+        (_position == null) ? '' : _position.longitude.toString(),
         _config.id,
       );
 
@@ -203,8 +206,13 @@ class _BaixaPageState extends State<BaixaPage> {
   }
 
   Future getPosition() async {
-    _position = await Geolocator()
-        .getLastKnownPosition(desiredAccuracy: LocationAccuracy.high);
+    bool serviceEnabled = await Geolocator().isLocationServiceEnabled();
+    if (serviceEnabled) {
+      _position = await Geolocator()
+          .getLastKnownPosition(desiredAccuracy: LocationAccuracy.high);
+    } else {
+      Scaffold.of(context).showSnackBar(snackBarD);
+    }
   }
 
   void alteraStatus(newValue) {

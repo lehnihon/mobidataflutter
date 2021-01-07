@@ -30,6 +30,9 @@ class _ListaState extends State {
   final snackBar = SnackBar(content: Text('Lista aceita!'));
   final snackBarB =
       SnackBar(content: Text('Cadastre seu ID em configurações!'));
+  final snackBarD = SnackBar(
+      content: Text(
+          'Ligue seu GPS e reinicie o App, ele pode não estar funcionando'));
 
   @override
   void initState() {
@@ -40,7 +43,7 @@ class _ListaState extends State {
   Future initData() async {
     getPosition();
     _config = await db.getConfig();
-    if (_config.id == null || _config.id == '') {
+    if (_config == null || _config.id == null || _config.id == '') {
       Scaffold.of(context).showSnackBar(snackBarB);
     } else {
       _getEntregas();
@@ -101,8 +104,13 @@ class _ListaState extends State {
   }
 
   Future getPosition() async {
-    _position = await Geolocator()
-        .getLastKnownPosition(desiredAccuracy: LocationAccuracy.high);
+    bool serviceEnabled = await Geolocator().isLocationServiceEnabled();
+    if (serviceEnabled) {
+      _position = await Geolocator()
+          .getLastKnownPosition(desiredAccuracy: LocationAccuracy.high);
+    } else {
+      Scaffold.of(context).showSnackBar(snackBarD);
+    }
   }
 
   Future sendData(baixa) async {
@@ -141,8 +149,8 @@ class _ListaState extends State {
       '',
       data,
       hora,
-      _position.latitude.toString(),
-      _position.longitude.toString(),
+      (_position == null) ? '' : _position.latitude.toString(),
+      (_position == null) ? '' : _position.longitude.toString(),
       _config.id,
     );
 
