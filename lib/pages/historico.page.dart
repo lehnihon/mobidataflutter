@@ -161,13 +161,8 @@ class _HistoricoState extends State {
                           child: ListTile(
                             leading: Icon(Icons.home),
                             title: Text('${historico[index].nota}'),
-                            subtitle: (historico[index].motivo == 'null' ||
-                                    historico[index].motivo == '' ||
-                                    historico[index].motivo == null)
-                                ? Text(
-                                    '${historico[index].enderecoentrega}\nLista disponivel')
-                                : Text(
-                                    '${historico[index].enderecoentrega}\n${historico[index].motivo}'),
+                            subtitle: Text(
+                                '${historico[index].nomeentrega}\n${historico[index].enderecoentrega}'),
                             isThreeLine: true,
                           ),
                         );

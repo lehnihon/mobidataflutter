@@ -69,8 +69,11 @@ class _ListaState extends State {
       } else {
         Iterable list = json.decode(response.body);
         setState(() {
-          this._loadingB = false;
           _listas = list.map((model) => Lista.fromJson(model)).toList();
+        });
+        await Future.delayed(Duration(seconds: 1));
+        setState(() {
+          this._loadingB = false;
         });
       }
     } catch (e) {
@@ -92,8 +95,11 @@ class _ListaState extends State {
       } else {
         Iterable list = json.decode(response.body);
         setState(() {
-          this._loading = false;
           _entregas = list.map((model) => Entrega.fromJson(model)).toList();
+        });
+        await Future.delayed(Duration(seconds: 1));
+        setState(() {
+          this._loading = false;
         });
       }
     } catch (e) {
