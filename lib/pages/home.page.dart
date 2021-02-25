@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobidata_dtc/pages/baixa.page.dart';
-import 'package:mobidata_dtc/pages/configuracoes.page.dart';
+import 'package:mobidata_dtc/pages/entregas.page.dart';
 import 'package:mobidata_dtc/pages/historico.page.dart';
 import 'package:mobidata_dtc/widgets/bottom_nav.widget.dart';
 
@@ -16,8 +16,8 @@ class _HomePageState extends State<HomePage> {
   List<Widget> _widgetOptions = <Widget>[
     BaixaPage(),
     ListaPage(),
+    EntregasPage(),
     HistoricoPage(),
-    ConfiguracoesPage(),
   ];
 
   onItemTapped(int index) {
@@ -35,6 +35,15 @@ class _HomePageState extends State<HomePage> {
             "assets/images/logo.png",
             height: 30,
           ),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: 'Configurações',
+              onPressed: () {
+                Navigator.of(context).pushNamed('/configuracoes');
+              },
+            ),
+          ],
         ),
         body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
         bottomNavigationBar:

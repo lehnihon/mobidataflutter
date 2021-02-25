@@ -17,7 +17,7 @@ class _HistoricoState extends State {
   DatabaseHelper db = DatabaseHelper();
   String _id;
   var _loading = false;
-  String dropdownValue = "Entregas";
+  String dropdownValue = "Encomendas";
   final _notaController = TextEditingController();
   bool _buttonsEnabled = true;
 
@@ -50,7 +50,7 @@ class _HistoricoState extends State {
 
   _getHistorico(nota) async {
     print(this.dropdownValue);
-    if (this.dropdownValue == 'Entregas') {
+    if (this.dropdownValue == 'Encomendas') {
       try {
         final response = await http.get(
             'http://34.200.50.59/mobidataapi/baixa_novo.php?id=$_id&nota=$nota');
@@ -119,7 +119,7 @@ class _HistoricoState extends State {
                           dropdownValue = newValue;
                         });
                       },
-                      items: <String>['Entregas', 'Listas']
+                      items: <String>['Encomendas', 'Listas']
                           .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,

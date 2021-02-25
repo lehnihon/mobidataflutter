@@ -9,30 +9,29 @@ class BottomNav extends StatelessWidget {
     @required this.onTapped,
   });
 
-
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.airport_shuttle),
-          title: Text('Baixa'),
+          title: Text('Baixas'),
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.apps),
-          title: Text('Lista'),
+          title: Text('Listas'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          title: Text('Encomendas'),
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.assignment),
           title: Text('Histórico'),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.build),
-          title: Text('Config.'),
-        ),
       ],
       currentIndex: index,
-      type: BottomNavigationBarType.fixed, 
+      type: BottomNavigationBarType.fixed,
       selectedItemColor: Theme.of(context).primaryColor,
       onTap: onTapped,
     );
